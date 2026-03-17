@@ -36,9 +36,12 @@ pub(crate) fn check_physical_lines(
     let enforce_blank_line_contains_whitespace =
         context.is_rule_enabled(Rule::BlankLineWithWhitespace);
     let enforce_copyright_notice = context.is_rule_enabled(Rule::MissingCopyrightNotice);
+    let ignore_overlong_triple_quoted_strings =
+        settings.pycodestyle.ignore_overlong_triple_quoted_strings;
 
     let mut doc_lines_iter = doc_lines.iter().peekable();
     let comment_ranges = indexer.comment_ranges();
+    let multiline_ranges = indexer.multiline_ranges();
 
     for line in locator.contents().universal_newlines() {
         while doc_lines_iter
@@ -54,7 +57,9 @@ pub(crate) fn check_physical_lines(
             mixed_spaces_and_tabs(&line, context);
         }
 
-        if enforce_line_too_long {
+        if enforce_line_too_long
+            && !(ignore_overlong_triple_quoted_strings && multiline_ranges.intersects(line.range()))
+        {
             line_too_long(&line, comment_ranges, settings, context);
         }
 
@@ -120,5 +125,35 @@ mod tests {
         let line_length = LineLength::try_from(8).unwrap();
         assert_eq!(check_with_max_line_length(line_length), vec![]);
         assert_eq!(check_with_max_line_length(line_length), vec![]);
+    }
+
+    #[test]
+    fn e501_triple_quoted_string() {
+        let source = r#"value = """
+this line is definitely longer than twenty characters
+"""
+other = "this line is definitely longer than twenty characters"
+"#;
+        let locator = Locator::new(source);
+        let parsed = parse_module(source).unwrap();
+        let indexer = Indexer::from_tokens(parsed.tokens(), locator.contents());
+        let stylist = Stylist::from_tokens(parsed.tokens(), locator.contents());
+
+        let check_with_setting = |ignore_overlong_triple_quoted_strings: bool| {
+            let settings = LinterSettings {
+                pycodestyle: pycodestyle::settings::Settings {
+                    max_line_length: LineLength::try_from(20).unwrap(),
+                    ignore_overlong_triple_quoted_strings,
+                    ..pycodestyle::settings::Settings::default()
+                },
+                ..LinterSettings::for_rule(Rule::LineTooLong)
+            };
+            let diagnostics = LintContext::new(Path::new("<filename>"), source, &settings);
+            check_physical_lines(&locator, &stylist, &indexer, &[], &settings, &diagnostics);
+            diagnostics.into_parts().0
+        };
+
+        assert_eq!(check_with_setting(false).len(), 2);
+        assert_eq!(check_with_setting(true).len(), 1);
     }
 }

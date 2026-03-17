@@ -2770,6 +2770,13 @@
             "null"
           ]
         },
+        "ignore-overlong-triple-quoted-strings": {
+          "description": "Whether line-length violations (`E501`) should be triggered for lines that\nare part of triple-quoted strings.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "max-doc-length": {
           "description": "The maximum line length to allow for [`doc-line-too-long`](https://docs.astral.sh/ruff/rules/doc-line-too-long/) violations within\ndocumentation (`W505`), including standalone comments. By default,\nthis is set to `null` which disables reporting violations.\n\nThe length is determined by the number of characters per line, except for lines containing Asian characters or emojis.\nFor these lines, the [unicode width](https://unicode.org/reports/tr11/) of each character is added up to determine the length.\n\nSee the [`doc-line-too-long`](https://docs.astral.sh/ruff/rules/doc-line-too-long/) rule for more information.",
           "anyOf": [

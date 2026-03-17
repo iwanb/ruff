@@ -36,6 +36,9 @@ use crate::settings::LinterSettings;
 /// also ignore comments that start with any of the specified [`lint.task-tags`]
 /// (e.g., `# TODO:`).
 ///
+/// If [`lint.pycodestyle.ignore-overlong-triple-quoted-strings`] is `true`, this
+/// rule will also ignore lines that are part of triple-quoted strings.
+///
 /// ## Example
 /// ```python
 /// my_function(param1, param2, param3, param4, param5, param6, param7, param8, param9, param10)
@@ -66,6 +69,7 @@ use crate::settings::LinterSettings;
 /// - `line-length`
 /// - `lint.task-tags`
 /// - `lint.pycodestyle.ignore-overlong-task-comments`
+/// - `lint.pycodestyle.ignore-overlong-triple-quoted-strings`
 /// - `lint.pycodestyle.max-line-length`
 ///
 /// [PEP 8]: https://peps.python.org/pep-0008/#maximum-line-length
