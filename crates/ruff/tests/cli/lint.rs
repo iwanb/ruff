@@ -395,6 +395,43 @@ other = "this line is definitely longer than twenty characters"
 }
 
 #[test]
+fn line_too_long_comment_override() -> Result<()> {
+    let test = CliTest::new()?;
+    test.write_file(
+        "ruff.toml",
+        r#"
+[lint]
+select = ["E501"]
+
+[lint.pycodestyle]
+max-line-length = 20
+ignore-overlong-comments = true
+"#,
+    )?;
+
+    assert_cmd_snapshot!(test.check_command()
+        .arg("--config")
+        .arg("ruff.toml")
+        .args(["--stdin-filename", "test.py"])
+        .arg("-")
+        .pass_stdin(r##"
+# this comment is definitely longer than twenty characters
+value = 1  # this comment is definitely longer than twenty characters
+other = "this line is definitely longer than twenty characters"  # short
+"##), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+    test.py:4:21: E501 Line too long (63 > 20)
+    Found 1 error.
+
+    ----- stderr -----
+    ");
+
+    Ok(())
+}
+
+#[test]
 fn per_file_ignores_stdin() -> Result<()> {
     let fixture = CliTest::with_file(
         "ruff.toml",

@@ -2763,6 +2763,13 @@
       "description": "Options for the `pycodestyle` plugin.",
       "type": "object",
       "properties": {
+        "ignore-overlong-comments": {
+          "description": "Whether line-length violations (`E501`) should be triggered for comments.\n\nWhen enabled, Ruff will ignore both standalone comments and trailing comments\nthat cause a line to exceed the configured maximum length.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "ignore-overlong-task-comments": {
           "description": "Whether line-length violations (`E501`) should be triggered for\ncomments starting with [`task-tags`](#lint_task-tags) (by default: \"TODO\", \"FIXME\",\nand \"XXX\").",
           "type": [

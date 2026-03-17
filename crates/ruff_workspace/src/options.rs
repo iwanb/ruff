@@ -3245,6 +3245,19 @@ pub struct PycodestyleOptions {
     )]
     pub ignore_overlong_task_comments: Option<bool>,
 
+    /// Whether line-length violations (`E501`) should be triggered for comments.
+    ///
+    /// When enabled, Ruff will ignore both standalone comments and trailing comments
+    /// that cause a line to exceed the configured maximum length.
+    #[option(
+        default = "false",
+        value_type = "bool",
+        example = r#"
+            ignore-overlong-comments = true
+        "#
+    )]
+    pub ignore_overlong_comments: Option<bool>,
+
     /// Whether line-length violations (`E501`) should be triggered for lines that
     /// are part of triple-quoted strings.
     #[option(
@@ -3263,6 +3276,7 @@ impl PycodestyleOptions {
             max_doc_length: self.max_doc_length,
             max_line_length: self.max_line_length.unwrap_or(global_line_length),
             ignore_overlong_task_comments: self.ignore_overlong_task_comments.unwrap_or_default(),
+            ignore_overlong_comments: self.ignore_overlong_comments.unwrap_or_default(),
             ignore_overlong_triple_quoted_strings: self
                 .ignore_overlong_triple_quoted_strings
                 .unwrap_or_default(),

@@ -156,4 +156,33 @@ other = "this line is definitely longer than twenty characters"
         assert_eq!(check_with_setting(false).len(), 2);
         assert_eq!(check_with_setting(true).len(), 1);
     }
+
+    #[test]
+    fn e501_comments() {
+        let source = r#"# this comment is definitely longer than twenty characters
+value = 1  # this comment is definitely longer than twenty characters
+value = "this line is definitely longer than twenty characters"  # short
+"#;
+        let locator = Locator::new(source);
+        let parsed = parse_module(source).unwrap();
+        let indexer = Indexer::from_tokens(parsed.tokens(), locator.contents());
+        let stylist = Stylist::from_tokens(parsed.tokens(), locator.contents());
+
+        let check_with_setting = |ignore_overlong_comments: bool| {
+            let settings = LinterSettings {
+                pycodestyle: pycodestyle::settings::Settings {
+                    max_line_length: LineLength::try_from(20).unwrap(),
+                    ignore_overlong_comments,
+                    ..pycodestyle::settings::Settings::default()
+                },
+                ..LinterSettings::for_rule(Rule::LineTooLong)
+            };
+            let diagnostics = LintContext::new(Path::new("<filename>"), source, &settings);
+            check_physical_lines(&locator, &stylist, &indexer, &[], &settings, &diagnostics);
+            diagnostics.into_parts().0
+        };
+
+        assert_eq!(check_with_setting(false).len(), 3);
+        assert_eq!(check_with_setting(true).len(), 1);
+    }
 }

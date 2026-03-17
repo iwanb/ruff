@@ -103,6 +103,7 @@ pub(crate) fn doc_line_too_long(
         } else {
             &[]
         },
+        false,
         settings.tab_size,
     ) {
         context.report_diagnostic(

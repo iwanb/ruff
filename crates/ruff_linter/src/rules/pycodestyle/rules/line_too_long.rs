@@ -36,6 +36,10 @@ use crate::settings::LinterSettings;
 /// also ignore comments that start with any of the specified [`lint.task-tags`]
 /// (e.g., `# TODO:`).
 ///
+/// If [`lint.pycodestyle.ignore-overlong-comments`] is `true`, this rule will
+/// also ignore standalone comments and trailing comments that cause a line to
+/// exceed the configured length.
+///
 /// If [`lint.pycodestyle.ignore-overlong-triple-quoted-strings`] is `true`, this
 /// rule will also ignore lines that are part of triple-quoted strings.
 ///
@@ -69,6 +73,7 @@ use crate::settings::LinterSettings;
 /// - `line-length`
 /// - `lint.task-tags`
 /// - `lint.pycodestyle.ignore-overlong-task-comments`
+/// - `lint.pycodestyle.ignore-overlong-comments`
 /// - `lint.pycodestyle.ignore-overlong-triple-quoted-strings`
 /// - `lint.pycodestyle.max-line-length`
 ///
@@ -103,6 +108,7 @@ pub(crate) fn line_too_long(
         } else {
             &[]
         },
+        settings.pycodestyle.ignore_overlong_comments,
         settings.tab_size,
     ) {
         context.report_diagnostic(
