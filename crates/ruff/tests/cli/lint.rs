@@ -357,6 +357,44 @@ _ = "---------------------------------------------------------------------------
 }
 
 #[test]
+fn line_too_long_triple_quoted_string_override() -> Result<()> {
+    let test = CliTest::new()?;
+    test.write_file(
+        "ruff.toml",
+        r#"
+[lint]
+select = ["E501"]
+
+[lint.pycodestyle]
+max-line-length = 20
+ignore-overlong-triple-quoted-strings = true
+"#,
+    )?;
+
+    assert_cmd_snapshot!(test.check_command()
+        .arg("--config")
+        .arg("ruff.toml")
+        .args(["--stdin-filename", "test.py"])
+        .arg("-")
+        .pass_stdin(r#"
+value = """
+this line is definitely longer than twenty characters
+"""
+other = "this line is definitely longer than twenty characters"
+"#), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+    test.py:5:21: E501 Line too long (63 > 20)
+    Found 1 error.
+
+    ----- stderr -----
+    ");
+
+    Ok(())
+}
+
+#[test]
 fn per_file_ignores_stdin() -> Result<()> {
     let fixture = CliTest::with_file(
         "ruff.toml",
